@@ -1,0 +1,15 @@
+[submodule "third-party/arrow"]
+	path = third-party/arrow
+	url = https://github.com/apache/arrow.git
+[submodule "third-party/utf8proc"]
+	path = third-party/utf8proc
+	url = https://github.com/JuliaStrings/utf8proc
+[submodule "third-party/orc"]
+	path = third-party/orc
+	url = https://github.com/apache/orc.git
+[submodule "third-party/avro"]
+	path = third-party/avro
+	url = https://github.com/apache/avro.git
+[submodule "third-party/googletest"]
+	path = third-party/googletest
+	url = https://github.com/google/googletest.git
