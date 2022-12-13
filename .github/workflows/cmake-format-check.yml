@@ -1,5 +1,9 @@
 name: cmake-format Check
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+    branches:
+      - main
 
 jobs:
   formatting-check:
