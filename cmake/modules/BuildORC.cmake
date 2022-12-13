@@ -5,7 +5,7 @@ function(build_orc)
   # disable java build
   list(APPEND orc_CMAKE_ARGS -DBUILD_JAVA=OFF)
 
-  # disable java CPP_TESTS
+  # disable CPP_TESTS
   list(APPEND orc_CMAKE_ARGS -DBUILD_CPP_TESTS=OFF)
 
   # diable BUILD_TOOLS

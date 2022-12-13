@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(APPLE)
@@ -37,9 +38,6 @@ endif(WITH_CCACHE)
 # Snappy compression library required by arrow
 find_package(snappy REQUIRED)
 
-# Thrift required by arrow
-find_package(thrift 0.13 REQUIRED)
-
 # Boost
 set(BOOST_COMPONENTS
     atomic
@@ -75,18 +73,11 @@ build_boost(
 include_directories(BEFORE SYSTEM ${Boost_INCLUDE_DIRS})
 
 option(ICEBERG_WITH_BACKTRACE "Build with backtrace support" ON)
-
-# This variable is set by project() in CMake 3.21+
-string(
-  COMPARE EQUAL
-          "${CMAKE_SOURCE_DIR}"
-          "${PROJECT_SOURCE_DIR}"
-          PROJECT_IS_TOP_LEVEL)
+option(ENABLE_TESTING "Enable the tests" ON)
 
 add_subdirectory(third-party)
 add_subdirectory(src)
 
-option(ENABLE_TESTING "Enable the tests" ${PROJECT_IS_TOP_LEVEL})
 if(ENABLE_TESTING)
   enable_testing()
   add_subdirectory(test)

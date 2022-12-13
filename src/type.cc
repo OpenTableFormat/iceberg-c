@@ -1,5 +1,6 @@
 #include "iceberg/type.hh"
 
+#include <cmath>
 #include <limits>
 #include <memory>
 #include <sstream>

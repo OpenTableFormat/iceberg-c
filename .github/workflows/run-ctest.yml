@@ -1,0 +1,30 @@
+name: Run Ctest
+on:
+  push:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: Unit Test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Setup cmake
+      uses: jwlawson/actions-setup-cmake@v1.13
+      with:
+        cmake-version: '3.16.x'
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+    - name: Install depedencies
+      run: sudo apt-get install -y libsnappy-dev libthrift-dev libboost-all-dev ccache
+    - name: ccache
+      uses: hendrikmuhs/ccache-action@v1.2
+    - name: Run unit tests
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DWITH_CCACHE=ON
+        make -j$(nproc)
+        ctest --output-on-failure
