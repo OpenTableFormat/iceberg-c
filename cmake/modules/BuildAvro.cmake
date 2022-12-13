@@ -2,24 +2,6 @@ function(build_avro)
   # only build static version
   list(APPEND avro_CMAKE_ARGS -DBUILD_SHARED_LIBS=OFF)
 
-  list(APPEND avro_CMAKE_ARGS -DBUILD_POSITION_INDEPENDENT_LIB=ON)
-
-  # cmake doesn't properly handle arguments containing ";", such as
-  # CMAKE_PREFIX_PATH, for which reason we'll have to use some other separator.
-  string(
-    REPLACE ";"
-            "!"
-            CMAKE_PREFIX_PATH_ALT_SEP
-            "${CMAKE_PREFIX_PATH}")
-  list(APPEND avro_CMAKE_ARGS -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH_ALT_SEP})
-  if(CMAKE_TOOLCHAIN_FILE)
-    list(APPEND avro_CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE})
-  endif()
-
-  list(APPEND avro_CMAKE_ARGS -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER})
-  list(APPEND avro_CMAKE_ARGS -DCMAKE_AR=${CMAKE_AR})
-  list(APPEND avro_CMAKE_ARGS -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
-
   if(NOT WITH_SYSTEM_BOOST)
     # make sure boost submodule builds first, so arrow can find its byproducts
     list(APPEND avro_DEPENDS Boost)
