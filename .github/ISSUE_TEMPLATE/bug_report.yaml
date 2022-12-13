@@ -1,0 +1,24 @@
+name: Bug Report
+description: Create a report to help us improve
+labels: ["Type: bug"]
+assignees: []
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug, including details regarding any error messages, version, and platform.
+      description: Please include what you expected.
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component(s)
+      multiple: true
+      options:
+        - Benchmarking
+        - Core
+        - IO
+        - Other
+    validations:
+      required: true

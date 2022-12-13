@@ -1,0 +1,28 @@
+
+name: Enhancement Request
+description: Request an enhancement to the project
+labels: ["Type: enhancement"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to share your feedback on ways Iceberg-c can be improved!
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the enhancement requested
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component(s)
+      multiple: true
+      options:
+        - Benchmarking
+        - Core
+        - IO
+        - Other
+    validations:
+      required: true
