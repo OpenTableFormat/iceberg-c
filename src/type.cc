@@ -373,22 +373,22 @@ std::shared_ptr<DataType> struct_(const std::vector<std::shared_ptr<Field>>& fie
   return std::make_shared<StructType>(fields);
 }
 
-std::shared_ptr<DataType> list(const std::shared_ptr<DataType>& value_type) {
+std::shared_ptr<DataType> list_(const std::shared_ptr<DataType>& value_type) {
   return std::make_shared<ListType>(value_type);
 }
 
-std::shared_ptr<DataType> list(const std::shared_ptr<Field>& value_field) {
+std::shared_ptr<DataType> list_(const std::shared_ptr<Field>& value_field) {
   return std::make_shared<ListType>(value_field);
 }
 
-std::shared_ptr<DataType> map(std::shared_ptr<DataType> key_type,
-                              std::shared_ptr<DataType> item_type, bool keys_sorted) {
+std::shared_ptr<DataType> map_(std::shared_ptr<DataType> key_type,
+                               std::shared_ptr<DataType> item_type, bool keys_sorted) {
   return std::make_shared<MapType>(std::move(key_type), std::move(item_type),
                                    keys_sorted);
 }
 
-std::shared_ptr<DataType> map(std::shared_ptr<DataType> key_type,
-                              std::shared_ptr<Field> item_field, bool keys_sorted) {
+std::shared_ptr<DataType> map_(std::shared_ptr<DataType> key_type,
+                               std::shared_ptr<Field> item_field, bool keys_sorted) {
   return std::make_shared<MapType>(std::move(key_type), std::move(item_field),
                                    keys_sorted);
 }

@@ -8,6 +8,7 @@ target_sources(
           result.cc
           field.cc
           type.cc
+          schema.cc
           util/logging.cc
           util/string_builder.cc)
 target_link_libraries(iceberg_objs PRIVATE iceberg_header)
