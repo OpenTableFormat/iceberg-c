@@ -39,6 +39,7 @@ endif(WITH_CCACHE)
 find_package(snappy REQUIRED)
 
 # Boost
+option(WITH_SYSTEM_BOOST "require and build with system Boost" OFF)
 set(BOOST_COMPONENTS
     atomic
     chrono
@@ -50,30 +51,37 @@ set(BOOST_COMPONENTS
     date_time
     iostreams
     context
-    coroutine
-    json)
+    coroutine)
 set(BOOST_HEADER_COMPONENTS container)
 
-include(ProcessorCount)
-ProcessorCount(DEFAULT_BOOST_J)
-if(DEFAULT_BOOST_J EQUAL 0)
-  set(DEFAULT_BOOST_J 1)
+if(WITH_SYSTEM_BOOST)
+  set(Boost_USE_STATIC_LIBS ON)
+  find_package(
+    Boost
+    COMPONENTS ${BOOST_COMPONENTS}
+    REQUIRED)
+else()
+  include(ProcessorCount)
+  ProcessorCount(DEFAULT_BOOST_J)
+  if(DEFAULT_BOOST_J EQUAL 0)
+    set(DEFAULT_BOOST_J 1)
+  endif()
+  set(BOOST_J
+      ${DEFAULT_BOOST_J}
+      CACHE STRING "max jobs for Boost build") # override w/-DBOOST_J=<n>
+  set(Boost_USE_STATIC_LIBS ON)
+  include(BuildBoost)
+  build_boost(
+    1.79
+    COMPONENTS
+    ${BOOST_COMPONENTS}
+    ${BOOST_HEADER_COMPONENTS})
 endif()
-set(BOOST_J
-    ${DEFAULT_BOOST_J}
-    CACHE STRING "max jobs for Boost build") # override w/-DBOOST_J=<n>
-set(Boost_USE_STATIC_LIBS ON)
-include(BuildBoost)
-build_boost(
-  1.79
-  COMPONENTS
-  ${BOOST_COMPONENTS}
-  ${BOOST_HEADER_COMPONENTS})
-
 include_directories(BEFORE SYSTEM ${Boost_INCLUDE_DIRS})
 
 option(ICEBERG_WITH_BACKTRACE "Build with backtrace support" ON)
 option(ENABLE_TESTING "Enable the tests" ON)
+option(WITH_SYSTEM_UTF8PROC "Use system-provided utf8proc" OFF)
 
 add_subdirectory(third-party)
 add_subdirectory(src)
