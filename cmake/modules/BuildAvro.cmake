@@ -13,8 +13,8 @@ function(build_avro)
   set(avro_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/avro/install")
   list(APPEND avro_CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${avro_INSTALL_PREFIX})
 
-  set(avro_INSTALL_LIBDIR "lib") # favroe lib so we don't have to guess between lib/lib64
-  list(APPEND avro_CMAKE_ARGS -DCMAKE_INSTALL_LIBDIR=${avro_INSTALL_LIBDIR})
+  set(avro_INSTALL_LIBDIR "lib") # force lib so we don't have to guess between lib/lib64
+  # list(APPEND avro_CMAKE_ARGS -DCMAKE_INSTALL_LIBDIR=${avro_INSTALL_LIBDIR})
   set(avro_LIBRARY_DIR "${avro_INSTALL_PREFIX}/${avro_INSTALL_LIBDIR}")
 
   set(avro_LIBRARY "${avro_LIBRARY_DIR}/libavrocpp.a")

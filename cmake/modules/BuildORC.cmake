@@ -13,6 +13,8 @@ function(build_orc)
 
   list(APPEND orc_CMAKE_ARGS -DBUILD_POSITION_INDEPENDENT_LIB=ON)
 
+  list(APPEND orc_CMAKE_ARGS -DSTOP_BUILD_ON_WARNING=OFF)
+
   # cmake doesn't properly handle arguments containing ";", such as
   # CMAKE_PREFIX_PATH, for which reason we'll have to use some other separator.
   string(

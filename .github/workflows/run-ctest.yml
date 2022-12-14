@@ -18,13 +18,13 @@ jobs:
       with:
         submodules: recursive
     - name: Install depedencies
-      run: sudo apt-get install -y libsnappy-dev libthrift-dev libboost-all-dev ccache
+      run: sudo apt-get install -y libsnappy-dev libthrift-dev libboost-all-dev ccache libutf8proc-dev
     - name: ccache
       uses: hendrikmuhs/ccache-action@v1.2
     - name: Run unit tests
       run: |
         mkdir build
         cd build
-        cmake .. -DWITH_CCACHE=ON
+        cmake .. -DWITH_CCACHE=ON -DWITH_SYSTEM_BOOST=ON -DWITH_SYSTEM_UTF8PROC=ON
         make -j$(nproc)
         ctest --output-on-failure
