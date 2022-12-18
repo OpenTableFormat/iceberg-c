@@ -14,4 +14,5 @@ add_executable(schema_test schema_test.cc)
 target_link_libraries(schema_test PRIVATE Iceberg::Iceberg GTest::GTest GTest::Main)
 add_test(NAME schema_test COMMAND schema_test)
 
+add_subdirectory(io)
 add_subdirectory(util)
