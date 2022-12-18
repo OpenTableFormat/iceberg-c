@@ -48,3 +48,11 @@
 #else
 #define ICEBERG_RESTRICT
 #endif
+
+#ifdef __APPLE__
+// due to macOS bug, we need to set read/write max
+#define ICEBERG_MAX_IO_CHUNKSIZE INT32_MAX
+#else
+// see notes on Linux read/write manpage
+#define ICEBERG_MAX_IO_CHUNKSIZE 0x7ffff000
+#endif

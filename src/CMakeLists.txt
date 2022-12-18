@@ -9,6 +9,10 @@ target_sources(
           field.cc
           type.cc
           schema.cc
+          io/filesystem.cc
+          io/localfs.cc
+          io/interfaces.cc
+          io/file.cc
           util/logging.cc
           util/string_builder.cc)
 target_link_libraries(iceberg_objs PRIVATE iceberg_header)
