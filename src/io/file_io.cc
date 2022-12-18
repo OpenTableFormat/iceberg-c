@@ -1,4 +1,4 @@
-#include "iceberg/io/interfaces.hh"
+#include "iceberg/io/file_io.hh"
 
 namespace iceberg {
 namespace io {
@@ -16,6 +16,13 @@ Status InputStream::Advance(int64_t nbytes) {
   auto res = Read(nbytes, static_cast<void*>(buffer));
   delete[] buffer;
   return res.status();
+}
+
+Status InputFile::CheckExists() const {
+  if (!exists()) {
+    return Status::Invalid("Input file not exists");
+  }
+  return Status::OK();
 }
 
 }  // namespace io
