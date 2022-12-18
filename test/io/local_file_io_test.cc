@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "iceberg/io/localfs.hh"
+#include "iceberg/io/local_file_io.hh"
 
 #include <memory>
 
@@ -9,8 +9,8 @@ namespace io {
 
 class LocalFSTest : public testing::Test {
  protected:
-  void SetUp() override { fs = std::make_shared<LocalFileSystem>(); }
-  std::shared_ptr<FileSystem> fs;
+  void SetUp() override { fs = std::make_shared<LocalFileIO>(); }
+  std::shared_ptr<FileIO> fs;
 };
 
 TEST_F(LocalFSTest, newOutputFile) {

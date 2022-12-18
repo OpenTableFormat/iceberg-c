@@ -3,7 +3,8 @@
 #include <memory>
 #include <string>
 
-#include "iceberg/io/interfaces.hh"
+#include "iceberg/result.hh"
+#include "iceberg/status.hh"
 #include "iceberg/util/compare.hh"
 #include "iceberg/util/macros.hh"
 #include "iceberg/util/visibility.hh"
@@ -39,6 +40,101 @@ struct ICEBERG_EXPORT FileInfo : public util::EqualityComparable<FileInfo> {
   std::string location_;
   int64_t size_;
   int64_t createdAtMillis_;
+};
+
+class ICEBERG_EXPORT FileInterface {
+ public:
+  virtual ~FileInterface() = 0;
+
+  /// \brief Close the stream cleanly
+  ///
+  /// For writable streams, this will attempt to flush any pending data before releasing
+  /// the underlying resource.
+  virtual Status Close() = 0;
+
+  /// \brief Return the position in the stream
+  virtual Result<int64_t> Tell() const = 0;
+
+  /// \brief Return whether the stream is closed
+  virtual bool closed() const = 0;
+
+ protected:
+  FileInterface() = default;
+
+ private:
+  ICEBERG_DISALLOW_COPY_AND_ASSIGN(FileInterface);
+};
+
+class ICEBERG_EXPORT Seekable {
+ public:
+  virtual ~Seekable() = default;
+  virtual Status Seek(int64_t position) = 0;
+};
+
+class ICEBERG_EXPORT Writable {
+ public:
+  virtual ~Writable() = default;
+
+  /// \brief Write the given data to the stream
+  ///
+  /// This method always processes the bytes in full. Depending on the semantics of the
+  /// stream, the data may be written out immediately, held in buffer, or written
+  /// asynchronously. In the case where the stream buffers the data, it will be copied. To
+  /// avoid potentially large copies, consider using a Write variant takes an owned
+  /// Buffer.
+  virtual Status Write(const void* data, int64_t nbytes) = 0;
+
+  /// \brief Flush buffered bytes, if any
+  virtual Status Flush();
+
+  Status Write(std::string_view data);
+};
+
+class ICEBERG_EXPORT Readable {
+ public:
+  virtual ~Readable() = default;
+
+  /// \brief Read data from current stream position.
+  ///
+  /// Read at most `nbytes` from the current stream position into `out`.
+  /// The number of bytes read is returned.
+  virtual Result<int64_t> Read(int64_t nbytes, void* out) = 0;
+};
+
+class ICEBERG_EXPORT OutputStream : virtual public FileInterface, public Writable {
+ protected:
+  OutputStream() = default;
+};
+
+class ICEBERG_EXPORT InputStream : virtual public FileInterface, public Readable {
+ public:
+  virtual ~InputStream() = default;
+
+  /// \brief Advance or skip stream indicated number of bytes
+  Status Advance(int64_t nbytes);
+
+ protected:
+  InputStream() = default;
+};
+
+/// \brief An interface with the methods needed to read data from a file.
+///
+/// Both table metadata files and data files can be written and read by this module.
+class ICEBERG_EXPORT SeekableInputStream : public InputStream, public Seekable {
+ public:
+  virtual ~SeekableInputStream() = default;
+
+ protected:
+  SeekableInputStream() = default;
+};
+
+/// \brief An interface with the methods needed to write data to a file.
+class ICEBERG_EXPORT PositionOutputStream : public OutputStream {
+ public:
+  virtual ~PositionOutputStream() = default;
+
+ protected:
+  PositionOutputStream() = default;
 };
 
 /// \brief An interface used to read input files using SeekableInputStream instances.
@@ -96,22 +192,21 @@ class ICEBERG_EXPORT OutputFile {
   ICEBERG_DISALLOW_COPY_AND_ASSIGN(OutputFile);
 };
 
-/// \brief Abstract file system API
+/// \brief Pluggable module for reading, writing, and deleting files.
 ///
-/// Pluggable module for reading, writing, and deleting files.
 /// Both table metadata files and data files can be written and read by this module.
-class ICEBERG_EXPORT FileSystem : public std::enable_shared_from_this<FileSystem>,
-                                  public util::EqualityComparable<FileSystem> {
+class ICEBERG_EXPORT FileIO : public std::enable_shared_from_this<FileIO>,
+                              public util::EqualityComparable<FileIO> {
  public:
-  virtual ~FileSystem(){};
+  virtual ~FileIO(){};
 
-  virtual bool Equals(const FileSystem& other) const = 0;
+  virtual bool Equals(const FileIO& other) const = 0;
 
-  virtual bool Equals(const std::shared_ptr<FileSystem>& other) const {
+  virtual bool Equals(const std::shared_ptr<FileIO>& other) const {
     return Equals(*other);
   }
 
-  virtual std::string fs_name() const = 0;
+  virtual std::string name() const = 0;
 
   /// \brief Get an InputFile instance to read bytes from the file at the given path.
   virtual Result<std::shared_ptr<InputFile>> newInputFile(const std::string& path) = 0;
@@ -132,7 +227,7 @@ class ICEBERG_EXPORT FileSystem : public std::enable_shared_from_this<FileSystem
   Status DeleteFile(const OutputFile& file) { return DeleteFile(file.location()); }
 
  protected:
-  explicit FileSystem() {}
+  explicit FileIO() {}
 };
 
 }  // namespace io
