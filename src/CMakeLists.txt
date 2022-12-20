@@ -9,6 +9,7 @@ target_sources(
           field.cc
           type.cc
           schema.cc
+          transform.cc
           io/file_io.cc
           io/local_file_io.cc
           util/logging.cc
