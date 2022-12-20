@@ -12,7 +12,8 @@ target_sources(
           io/file_io.cc
           io/local_file_io.cc
           util/logging.cc
-          util/string_builder.cc)
+          util/string_builder.cc
+          util/murmur_hash3.cc)
 target_link_libraries(iceberg_objs PRIVATE iceberg_header)
 
 add_library(iceberg STATIC)
