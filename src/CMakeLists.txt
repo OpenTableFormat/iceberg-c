@@ -10,6 +10,7 @@ target_sources(
           type.cc
           schema.cc
           transform.cc
+          partitioning.cc
           io/file_io.cc
           io/local_file_io.cc
           util/logging.cc
