@@ -11,6 +11,8 @@ target_sources(
           schema.cc
           transform.cc
           partitioning.cc
+          snapshot.cc
+          table.cc
           io/file_io.cc
           io/local_file_io.cc
           util/logging.cc
