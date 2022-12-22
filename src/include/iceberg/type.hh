@@ -531,11 +531,13 @@ class ICEBERG_EXPORT ListType : public NestedType {
   std::shared_ptr<DataType> value_type() const { return children_[0]->type(); }
 
   // List can contain any other logical value type
-  explicit ListType(const std::shared_ptr<DataType>& value_type)
-      : ListType(std::make_shared<Field>("item", value_type)) {}
+  explicit ListType(std::string element_name, int32_t element_id,
+                    const std::shared_ptr<DataType>& element_type)
+      : ListType(
+            std::make_shared<Field>(std::move(element_name), element_id, element_type)) {}
 
-  explicit ListType(const std::shared_ptr<Field>& value_field) : NestedType(type_id) {
-    children_ = {value_field};
+  explicit ListType(const std::shared_ptr<Field>& element_field) : NestedType(type_id) {
+    children_ = {element_field};
   }
 
   std::string ToString() const override;
@@ -544,35 +546,30 @@ class ICEBERG_EXPORT ListType : public NestedType {
 /// \brief Concrete type class for map data
 ///
 /// Map data is nested data where each value is a variable number of
-/// key-item pairs.  Its physical representation is the same as
-/// a list of `{key, item}` structs.
+/// key-item pairs.
 ///
 /// Maps can be recursively nested, for example map(utf8, map(utf8, int32)).
-class ICEBERG_EXPORT MapType : public ListType {
+class ICEBERG_EXPORT MapType : public NestedType {
  public:
   static constexpr Type::type type_id = Type::MAP;
   static constexpr const char* type_name() { return "map"; }
 
-  MapType(std::shared_ptr<DataType> key_type, std::shared_ptr<DataType> item_type,
-          bool keys_sorted = false);
-
-  MapType(std::shared_ptr<DataType> key_type, std::shared_ptr<Field> item_field,
-          bool keys_sorted = false);
-
-  MapType(std::shared_ptr<Field> key_field, std::shared_ptr<Field> item_field,
-          bool keys_sorted = false);
-
-  explicit MapType(std::shared_ptr<Field> value_field, bool keys_sorted = false);
+  explicit MapType(std::shared_ptr<Field> key_field, std::shared_ptr<Field> value_field,
+                   bool keys_sorted = false)
+      : NestedType(type_id), keys_sorted_(keys_sorted) {
+    children_ = {std::move(key_field), std::move(value_field)};
+  }
 
   // Validating constructor
-  static Result<std::shared_ptr<DataType>> Make(std::shared_ptr<Field> value_field,
+  static Result<std::shared_ptr<DataType>> Make(std::shared_ptr<Field> key_field,
+                                                std::shared_ptr<Field> value_field,
                                                 bool keys_sorted = false);
 
-  const std::shared_ptr<Field>& key_field() const { return value_type()->field(0); }
+  const std::shared_ptr<Field>& key_field() const { return children_[0]; }
   std::shared_ptr<DataType> key_type() const { return key_field()->type(); }
 
-  const std::shared_ptr<Field>& item_field() const { return value_type()->field(1); }
-  std::shared_ptr<DataType> item_type() const { return item_field()->type(); }
+  const std::shared_ptr<Field>& value_field() const { return children_[1]; }
+  std::shared_ptr<DataType> value_type() const { return value_field()->type(); }
 
   std::string ToString() const override;
 
@@ -627,24 +624,19 @@ ICEBERG_EXPORT std::shared_ptr<DataType> struct_(
 
 /// \brief Create a ListType instance from its child Field type
 ICEBERG_EXPORT
-std::shared_ptr<DataType> list_(const std::shared_ptr<Field>& value_type);
+std::shared_ptr<DataType> list_(const std::shared_ptr<Field>& elem_field);
 
 /// \brief Create a ListType instance from its child DataType
 ICEBERG_EXPORT
-std::shared_ptr<DataType> list_(const std::shared_ptr<DataType>& value_type);
+std::shared_ptr<DataType> list_(std::string elem_name, int32_t elem_id,
+                                const std::shared_ptr<DataType>& elem_type);
 
-/// \brief Create a MapType instance from its key and value DataTypes
-ICEBERG_EXPORT
-std::shared_ptr<DataType> map_(std::shared_ptr<DataType> key_type,
-                               std::shared_ptr<DataType> item_type,
-                               bool keys_sorted = false);
-
-/// \brief Create a MapType instance from its key DataType and value field.
+/// \brief Create a MapType instance from its key field and value field.
 ///
 /// The field override is provided to communicate nullability of the value.
 ICEBERG_EXPORT
-std::shared_ptr<DataType> _map(std::shared_ptr<DataType> key_type,
-                               std::shared_ptr<Field> item_field,
+std::shared_ptr<DataType> map_(std::shared_ptr<Field> key_field,
+                               std::shared_ptr<Field> value_field,
                                bool keys_sorted = false);
 
 /// @}

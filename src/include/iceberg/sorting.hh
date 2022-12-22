@@ -29,7 +29,7 @@ enum class NullOrder : int8_t {
 class ICEBERG_EXPORT SortField {
  public:
   SortField(int32_t source_id, std::shared_ptr<Transform> transform,
-            SortDirection direction, NullOrder null_order_)
+            SortDirection direction, NullOrder null_order)
       : source_id_(source_id),
         transform_(std::move(transform)),
         direction_(direction),
@@ -65,7 +65,7 @@ class ICEBERG_EXPORT SortOrder {
 
   std::shared_ptr<Schema>& schema() { return schema_; }
 
-  int32_t order_id() { return order_id; }
+  int32_t order_id() { return order_id_; }
 
   std::vector<std::shared_ptr<SortField>>& fields() { return fields_; }
 
@@ -80,7 +80,7 @@ class ICEBERG_EXPORT SortOrder {
   std::shared_ptr<Schema> schema_;
   int32_t order_id_;
   std::vector<std::shared_ptr<SortField>> fields_;
-}
+};
 
 }  // namespace table
 }  // namespace iceberg

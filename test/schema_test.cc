@@ -8,11 +8,11 @@ namespace iceberg {
 using TestSchema = ::testing::Test;
 
 TEST_F(TestSchema, Basics) {
-  auto f0 = field_("f0", integer_());
-  auto f1 = field_("f1", long_(), false);
-  auto f1_optional = field_("f1", long_());
+  auto f0 = field_("f0", 1, integer_());
+  auto f1 = field_("f1", 2, long_(), false);
+  auto f1_optional = field_("f1", 2, long_());
 
-  auto f2 = field_("f2", long_());
+  auto f2 = field_("f2", 3, long_());
 
   auto schema = ::iceberg::schema_({f0, f1, f2});
 
@@ -32,23 +32,23 @@ TEST_F(TestSchema, Basics) {
 }
 
 TEST_F(TestSchema, ToString) {
-  auto f0 = field_("f0", integer_());
-  auto f1 = field_("f1", long_(), false);
-  auto f2 = field_("f2", string_());
-  auto f3 = field_("f3", list_(integer_()));
+  auto f0 = field_("f0", 1, integer_());
+  auto f1 = field_("f1", 2, long_(), false);
+  auto f2 = field_("f2", 3, string_());
+  auto f3 = field_("f3", 4, list_("item", 5, integer_()));
 
   auto schema = ::iceberg::schema_({f0, f1, f2, f3});
   std::string result = schema->ToString();
   std::string expected = R"(schema_id: 0
-struct<f0: integer, f1: long not null, f2: string, f3: list<item: integer>>)";
+struct<1: f0: integer, 2: f1: long not null, 3: f2: string, 4: f3: list<5: item: integer>>)";
   ASSERT_EQ(expected, result);
 }
 
 TEST_F(TestSchema, GetFieldByName) {
-  auto f0 = field_("f0", integer_());
-  auto f1 = field_("f1", uuid_(), false);
-  auto f2 = field_("f2", binary_());
-  auto f3 = field_("f3", list_(date_()));
+  auto f0 = field_("f0", 1, integer_());
+  auto f1 = field_("f1", 2, uuid_(), false);
+  auto f2 = field_("f2", 3, binary_());
+  auto f3 = field_("f3", 4, list_("item", 5, date_()));
 
   auto schema = schema_({f0, f1, f2, f3});
 
@@ -64,10 +64,10 @@ TEST_F(TestSchema, GetFieldByName) {
 }
 
 TEST_F(TestSchema, GetFieldIndex) {
-  auto f0 = field_("f0", integer_());
-  auto f1 = field_("f1", uuid_(), false);
-  auto f2 = field_("f2", binary_());
-  auto f3 = field_("f3", list_(date_()));
+  auto f0 = field_("f0", 1, integer_());
+  auto f1 = field_("f1", 2, uuid_(), false);
+  auto f2 = field_("f2", 3, binary_());
+  auto f3 = field_("f3", 4, list_("item", 5, date_()));
 
   auto schema = schema_({f0, f1, f2, f3});
 
@@ -79,10 +79,10 @@ TEST_F(TestSchema, GetFieldIndex) {
 }
 
 TEST_F(TestSchema, GetFieldDuplicates) {
-  auto f0 = field_("f0", integer_());
-  auto f1 = field_("f1", uuid_(), false);
-  auto f2 = field_("f2", binary_());
-  auto f3 = field_("f1", list_(date_()));
+  auto f0 = field_("f0", 1, integer_());
+  auto f1 = field_("f1", 2, uuid_(), false);
+  auto f2 = field_("f2", 3, binary_());
+  auto f3 = field_("f1", 4, list_("item", 5, date_()));
 
   auto schema = schema_({f0, f1, f2, f3});
 
@@ -108,10 +108,10 @@ TEST_F(TestSchema, GetFieldDuplicates) {
 }
 
 TEST_F(TestSchema, CanReferenceFieldsByNames) {
-  auto f0 = field_("f0", integer_());
-  auto f1 = field_("f1", uuid_(), false);
-  auto f2 = field_("f2", binary_());
-  auto f3 = field_("f1", list_(date_()));
+  auto f0 = field_("f0", 1, integer_());
+  auto f1 = field_("f1", 2, uuid_(), false);
+  auto f2 = field_("f2", 3, binary_());
+  auto f3 = field_("f1", 4, list_("item", 5, date_()));
 
   auto schema = schema_({f0, f1, f2, f3});
 

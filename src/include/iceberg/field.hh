@@ -18,12 +18,16 @@ class DataType;
 ///
 class ICEBERG_EXPORT Field : public util::EqualityComparable<Field> {
  public:
-  Field(std::string name, std::shared_ptr<DataType> type, bool nullable = true)
-      : name_(std::move(name)), type_(std::move(type)), nullable_(nullable) {}
+  Field(std::string name, int32_t id, std::shared_ptr<DataType> type,
+        bool nullable = true)
+      : name_(std::move(name)), id_(id), type_(std::move(type)), nullable_(nullable) {}
   ~Field();
 
   /// \brief Return a copy of this field with the replaced type.
   std::shared_ptr<Field> WithType(const std::shared_ptr<DataType>& type) const;
+
+  /// \brief Return a copy of this field with the replaced id.
+  std::shared_ptr<Field> WithId(int32_t id) const;
 
   /// \brief Return a copy of this field with the replaced name.
   std::shared_ptr<Field> WithName(const std::string& name) const;
@@ -44,6 +48,8 @@ class ICEBERG_EXPORT Field : public util::EqualityComparable<Field> {
 
   /// \brief Return the field name
   const std::string& name() const { return name_; }
+  /// \brief Return the field id that is unique in the table schema
+  int32_t id() { return id_; }
   /// \brief Return the field data type
   const std::shared_ptr<DataType>& type() const { return type_; }
   /// \brief Return whether the field is nullable
@@ -54,6 +60,9 @@ class ICEBERG_EXPORT Field : public util::EqualityComparable<Field> {
  private:
   // Field name
   std::string name_;
+
+  // Field id
+  int32_t id_;
 
   // The field's data type
   std::shared_ptr<DataType> type_;
@@ -72,9 +81,10 @@ class ICEBERG_EXPORT Field : public util::EqualityComparable<Field> {
 /// \brief Create a Field instance
 ///
 /// \param name the field name
+/// \param id the field id
 /// \param type the field value type
 /// \param nullable whether the values are nullable, default true
-ICEBERG_EXPORT std::shared_ptr<Field> field_(std::string name,
+ICEBERG_EXPORT std::shared_ptr<Field> field_(std::string name, int32_t id,
                                              std::shared_ptr<DataType> type,
                                              bool nullable = true);
 

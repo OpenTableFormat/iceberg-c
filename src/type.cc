@@ -271,69 +271,24 @@ std::string ListType::ToString() const {
 // ----------------------------------------------------------------------
 // Map type
 
-MapType::MapType(std::shared_ptr<DataType> key_type, std::shared_ptr<DataType> item_type,
-                 bool keys_sorted)
-    : MapType(::iceberg::field_("key", std::move(key_type), false),
-              ::iceberg::field_("value", std::move(item_type)), keys_sorted) {}
-
-MapType::MapType(std::shared_ptr<DataType> key_type, std::shared_ptr<Field> item_field,
-                 bool keys_sorted)
-    : MapType(::iceberg::field_("key", std::move(key_type), false), std::move(item_field),
-              keys_sorted) {}
-
-MapType::MapType(std::shared_ptr<Field> key_field, std::shared_ptr<Field> item_field,
-                 bool keys_sorted)
-    : MapType(
-          ::iceberg::field_(
-              "entries",
-              ::iceberg::struct_({std::move(key_field), std::move(item_field)}), false),
-          keys_sorted) {}
-
-MapType::MapType(std::shared_ptr<Field> value_field, bool keys_sorted)
-    : ListType(std::move(value_field)), keys_sorted_(keys_sorted) {
-  id_ = type_id;
-}
-
-Result<std::shared_ptr<DataType>> MapType::Make(std::shared_ptr<Field> value_field,
+Result<std::shared_ptr<DataType>> MapType::Make(std::shared_ptr<Field> key_field,
+                                                std::shared_ptr<Field> value_field,
                                                 bool keys_sorted) {
-  const auto& value_type = *value_field->type();
-  if (value_field->nullable() || value_type.id() != Type::STRUCT) {
-    return Status::TypeError("Map entry field should be non-nullable struct");
-  }
-  const auto& struct_type = checked_cast<const StructType&>(value_type);
-  if (struct_type.num_fields() != 2) {
-    return Status::TypeError("Map entry field should have two children (got ",
-                             struct_type.num_fields(), ")");
-  }
-  if (struct_type.field(0)->nullable()) {
+  if (key_field->nullable()) {
     return Status::TypeError("Map key field should be non-nullable");
   }
-  return std::make_shared<MapType>(std::move(value_field), keys_sorted);
+  return std::make_shared<MapType>(std::move(key_field), std::move(value_field),
+                                   keys_sorted);
 }
 
 std::string MapType::ToString() const {
   std::stringstream s;
 
-  const auto print_field_name = [](std::ostream& os, const Field& field,
-                                   const char* std_name) {
-    if (field.name() != std_name) {
-      os << " ('" << field.name() << "')";
-    }
-  };
-  const auto print_field = [&](std::ostream& os, const Field& field,
-                               const char* std_name) {
-    os << field.type()->ToString();
-    print_field_name(os, field, std_name);
-  };
-
-  s << "map<";
-  print_field(s, *key_field(), "key");
-  s << ", ";
-  print_field(s, *item_field(), "value");
+  s << "map<" << key_field()->ToString() << ", " << value_field()->ToString();
   if (keys_sorted_) {
     s << ", keys_sorted";
   }
-  print_field_name(s, *value_field(), "entries");
+
   s << ">";
   return s.str();
 }
@@ -374,23 +329,18 @@ std::shared_ptr<DataType> struct_(const std::vector<std::shared_ptr<Field>>& fie
   return std::make_shared<StructType>(fields);
 }
 
-std::shared_ptr<DataType> list_(const std::shared_ptr<DataType>& value_type) {
-  return std::make_shared<ListType>(value_type);
+std::shared_ptr<DataType> list_(std::string elem_name, int32_t elem_id,
+                                const std::shared_ptr<DataType>& elem_type) {
+  return std::make_shared<ListType>(elem_name, elem_id, elem_type);
 }
 
-std::shared_ptr<DataType> list_(const std::shared_ptr<Field>& value_field) {
-  return std::make_shared<ListType>(value_field);
+std::shared_ptr<DataType> list_(const std::shared_ptr<Field>& elem_field) {
+  return std::make_shared<ListType>(elem_field);
 }
 
-std::shared_ptr<DataType> map_(std::shared_ptr<DataType> key_type,
-                               std::shared_ptr<DataType> item_type, bool keys_sorted) {
-  return std::make_shared<MapType>(std::move(key_type), std::move(item_type),
-                                   keys_sorted);
-}
-
-std::shared_ptr<DataType> map_(std::shared_ptr<DataType> key_type,
-                               std::shared_ptr<Field> item_field, bool keys_sorted) {
-  return std::make_shared<MapType>(std::move(key_type), std::move(item_field),
+std::shared_ptr<DataType> map_(std::shared_ptr<Field> key_field,
+                               std::shared_ptr<Field> value_field, bool keys_sorted) {
+  return std::make_shared<MapType>(std::move(key_field), std::move(value_field),
                                    keys_sorted);
 }
 
@@ -455,7 +405,7 @@ class TypeEqualsVisitor {
       return Status::OK();
     }
     result_ = left.key_type()->Equals(*right.key_type()) &&
-              left.item_type()->Equals(*right.item_type());
+              left.value_type()->Equals(*right.value_type());
     return Status::OK();
   }
 
