@@ -7,8 +7,8 @@
 namespace iceberg {
 
 TEST(TestField, Basics) {
-  Field f0("f0", integer_());
-  Field f0_nn("f0", integer_(), false);
+  Field f0("f0", 1, integer_());
+  Field f0_nn("f0", 2, integer_(), false);
 
   ASSERT_EQ(f0.name(), "f0");
   ASSERT_EQ(f0.type()->ToString(), integer_()->ToString());
@@ -18,16 +18,16 @@ TEST(TestField, Basics) {
 }
 
 TEST(TestField, ToString) {
-  auto f0 = field_("f0", integer_(), false);
+  auto f0 = field_("f0", 1, integer_(), false);
   std::string result = f0->ToString();
-  std::string expected = "f0: integer not null";
+  std::string expected = "1: f0: integer not null";
   ASSERT_EQ(expected, result);
 }
 
 TEST(TestField, Equals) {
-  Field f0("f0", long_());
-  Field f0_nn("f0", long_(), false);
-  Field f0_other("f0", long_());
+  Field f0("f0", 1, long_());
+  Field f0_nn("f0", 1, long_(), false);
+  Field f0_other("f0", 1, long_());
 
   ASSERT_EQ(f0, f0_other);
   ASSERT_NE(f0, f0_nn);
@@ -97,13 +97,13 @@ TEST(TestTypes, TestDecimalType) {
 
 TEST(TestTypes, TestStructType) {
   auto f0_type = integer_();
-  auto f0 = field_("f0", f0_type);
+  auto f0 = field_("f0", 1, f0_type);
 
   auto f1_type = string_();
-  auto f1 = field_("f1", f1_type);
+  auto f1 = field_("f1", 2, f1_type);
 
   auto f2_type = long_();
-  auto f2 = field_("f2", f2_type);
+  auto f2 = field_("f2", 3, f2_type);
 
   std::vector<std::shared_ptr<Field>> fields = {f0, f1, f2};
 
@@ -113,7 +113,7 @@ TEST(TestTypes, TestStructType) {
   ASSERT_TRUE(struct_type.field(1)->Equals(f1));
   ASSERT_TRUE(struct_type.field(2)->Equals(f2));
 
-  ASSERT_EQ(struct_type.ToString(), "struct<f0: integer, f1: string, f2: long>");
+  ASSERT_EQ(struct_type.ToString(), "struct<1: f0: integer, 2: f1: string, 3: f2: long>");
 
   std::shared_ptr<Field> result = struct_type.GetFieldByName("f1");
   ASSERT_EQ(f1, result);
@@ -132,30 +132,29 @@ TEST(TestTypes, TestStructType) {
 TEST(TestTypes, TestListType) {
   std::shared_ptr<DataType> vt = std::make_shared<LongType>();
 
-  ListType list_type(vt);
+  ListType list_type("item", 1, vt);
   ASSERT_EQ(list_type.id(), Type::LIST);
 
-  ASSERT_EQ("list<item: long>", list_type.ToString());
+  ASSERT_EQ("list<1: item: long>", list_type.ToString());
 
   std::shared_ptr<DataType> st = std::make_shared<StringType>();
-  std::shared_ptr<DataType> lt = std::make_shared<ListType>(st);
-  ASSERT_EQ("list<item: string>", lt->ToString());
+  std::shared_ptr<DataType> lt = std::make_shared<ListType>("item", 1, st);
+  ASSERT_EQ("list<1: item: string>", lt->ToString());
 
-  ListType lt2(lt);
-  ASSERT_EQ("list<item: list<item: string>>", lt2.ToString());
+  ListType lt2("item", 2, lt);
+  ASSERT_EQ("list<2: item: list<1: item: string>>", lt2.ToString());
 }
 
 TEST(TestTypes, TestMapType) {
-  std::shared_ptr<DataType> kt = std::make_shared<StringType>();
-  std::shared_ptr<DataType> it = std::make_shared<IntegerType>();
+  std::shared_ptr<Field> kt = field_("key", 1, string_());
+  std::shared_ptr<Field> it = field_("item", 2, integer_());
 
   MapType map_type(kt, it);
   ASSERT_EQ(map_type.id(), Type::MAP);
-  ASSERT_EQ("map<string, integer>", map_type.ToString());
+  ASSERT_EQ("map<1: key: string, 2: item: integer>", map_type.ToString());
 
-  ASSERT_EQ(map_type.key_type()->id(), kt->id());
-  ASSERT_EQ(map_type.item_type()->id(), it->id());
-  ASSERT_EQ(map_type.value_type()->id(), Type::STRUCT);
+  ASSERT_EQ(1, kt->id());
+  ASSERT_EQ(2, it->id());
 }
 
 }  // namespace iceberg
